@@ -1,6 +1,7 @@
 // Local Storage wrapper for Gerda Health App
 
 import type { UserProfile } from './calculations';
+import type { FoodItem } from '../data/foodDatabase';
 
 export interface FoodEntry {
     id: string;
@@ -38,7 +39,8 @@ const STORAGE_KEYS = {
     USER_PROFILE: 'gerda_user_profile',
     DAILY_LOGS: 'gerda_daily_logs',
     STREAKS: 'gerda_streaks',
-    NOTIFICATIONS_ENABLED: 'gerda_notifications_enabled'
+    NOTIFICATIONS_ENABLED: 'gerda_notifications_enabled',
+    CUSTOM_FOODS: 'gerda_custom_foods'
 };
 
 /**
@@ -230,4 +232,33 @@ export function clearAllData(): void {
     Object.values(STORAGE_KEYS).forEach(key => {
         localStorage.removeItem(key);
     });
+}
+
+/**
+ * Custom food items
+ */
+export function getCustomFoods(): FoodItem[] {
+    const data = localStorage.getItem(STORAGE_KEYS.CUSTOM_FOODS);
+    return data ? JSON.parse(data) : [];
+}
+
+export function saveCustomFoods(foods: FoodItem[]): void {
+    localStorage.setItem(STORAGE_KEYS.CUSTOM_FOODS, JSON.stringify(foods));
+}
+
+export function addCustomFood(food: Omit<FoodItem, 'id'>): FoodItem {
+    const newFood: FoodItem = {
+        ...food,
+        id: `cust_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`
+    };
+    const foods = getCustomFoods();
+    foods.unshift(newFood);
+    saveCustomFoods(foods);
+    return newFood;
+}
+
+export function removeCustomFood(foodId: string): void {
+    const foods = getCustomFoods();
+    const nextFoods = foods.filter(food => food.id !== foodId);
+    saveCustomFoods(nextFoods);
 }

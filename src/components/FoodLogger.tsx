@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FOOD_DATABASE, getCategoryLabel, type FoodItem } from '../data/foodDatabase';
-import { addFoodEntry, removeFoodEntry, getTodayLog } from '../utils/storage';
+import { addFoodEntry, removeFoodEntry, getTodayLog, getCustomFoods, addCustomFood, removeCustomFood } from '../utils/storage';
 
 interface FoodLoggerProps {
     onUpdate: () => void;
@@ -10,10 +10,23 @@ export default function FoodLogger({ onUpdate }: FoodLoggerProps) {
     const [selectedCategory, setSelectedCategory] = useState<FoodItem['category']>('ontbijt');
     const [searchQuery, setSearchQuery] = useState('');
     const [todayFoods, setTodayFoods] = useState(getTodayLog().foods);
+    const [customFoods, setCustomFoods] = useState<FoodItem[]>(getCustomFoods());
+    const [customForm, setCustomForm] = useState({
+        name: '',
+        category: 'ontbijt' as FoodItem['category'],
+        serving: '',
+        calories: '',
+        protein: '',
+        carbs: '',
+        fat: '',
+        healthScore: '7'
+    });
 
     const categories: FoodItem['category'][] = ['ontbijt', 'lunch', 'diner', 'snacks', 'dranken'];
 
-    const filteredFoods = FOOD_DATABASE.filter(food => {
+    const allFoods = [...customFoods, ...FOOD_DATABASE];
+
+    const filteredFoods = allFoods.filter(food => {
         const matchesCategory = food.category === selectedCategory;
         const matchesSearch = food.name.toLowerCase().includes(searchQuery.toLowerCase());
         return matchesCategory && matchesSearch;
@@ -36,6 +49,46 @@ export default function FoodLogger({ onUpdate }: FoodLoggerProps) {
         removeFoodEntry(foodId);
         setTodayFoods(getTodayLog().foods);
         onUpdate();
+    };
+
+    const handleAddCustomFood = () => {
+        if (!customForm.name.trim() || !customForm.serving.trim()) return;
+        const calories = parseFloat(customForm.calories);
+        const protein = parseFloat(customForm.protein);
+        const carbs = parseFloat(customForm.carbs);
+        const fat = parseFloat(customForm.fat);
+        const healthScore = parseInt(customForm.healthScore, 10);
+
+        if ([calories, protein, carbs, fat].some((v) => isNaN(v))) return;
+        if (isNaN(healthScore) || healthScore < 1 || healthScore > 10) return;
+
+        const newFood = addCustomFood({
+            name: customForm.name.trim(),
+            category: customForm.category,
+            serving: customForm.serving.trim(),
+            calories,
+            protein,
+            carbs,
+            fat,
+            healthScore
+        });
+
+        setCustomFoods([newFood, ...customFoods]);
+        setCustomForm({
+            name: '',
+            category: customForm.category,
+            serving: '',
+            calories: '',
+            protein: '',
+            carbs: '',
+            fat: '',
+            healthScore: '7'
+        });
+    };
+
+    const handleRemoveCustomFood = (foodId: string) => {
+        removeCustomFood(foodId);
+        setCustomFoods(getCustomFoods());
     };
 
     const getHealthScoreBadge = (score: number) => {
@@ -85,6 +138,124 @@ export default function FoodLogger({ onUpdate }: FoodLoggerProps) {
                 />
             </div>
 
+            {/* Custom Food */}
+            <div className="card mb-lg">
+                <h3 className="card-title">Eigen item toevoegen</h3>
+                <div className="custom-grid">
+                    <div className="form-group">
+                        <label className="form-label">Naam</label>
+                        <input
+                            type="text"
+                            className="form-input"
+                            value={customForm.name}
+                            onChange={(e) => setCustomForm({ ...customForm, name: e.target.value })}
+                            placeholder="Bijv. Kipfilet"
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label className="form-label">Categorie</label>
+                        <select
+                            className="form-select"
+                            value={customForm.category}
+                            onChange={(e) => setCustomForm({ ...customForm, category: e.target.value as FoodItem['category'] })}
+                        >
+                            {categories.map(cat => (
+                                <option key={cat} value={cat}>{getCategoryLabel(cat)}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="form-group">
+                        <label className="form-label">Portie</label>
+                        <input
+                            type="text"
+                            className="form-input"
+                            value={customForm.serving}
+                            onChange={(e) => setCustomForm({ ...customForm, serving: e.target.value })}
+                            placeholder="Bijv. 100g"
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label className="form-label">Calorieën</label>
+                        <input
+                            type="number"
+                            className="form-input"
+                            value={customForm.calories}
+                            onChange={(e) => setCustomForm({ ...customForm, calories: e.target.value })}
+                            placeholder="120"
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label className="form-label">Eiwit (g)</label>
+                        <input
+                            type="number"
+                            className="form-input"
+                            value={customForm.protein}
+                            onChange={(e) => setCustomForm({ ...customForm, protein: e.target.value })}
+                            placeholder="25"
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label className="form-label">Koolhydraten (g)</label>
+                        <input
+                            type="number"
+                            className="form-input"
+                            value={customForm.carbs}
+                            onChange={(e) => setCustomForm({ ...customForm, carbs: e.target.value })}
+                            placeholder="3"
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label className="form-label">Vetten (g)</label>
+                        <input
+                            type="number"
+                            className="form-input"
+                            value={customForm.fat}
+                            onChange={(e) => setCustomForm({ ...customForm, fat: e.target.value })}
+                            placeholder="2"
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label className="form-label">Gezondheids-score (1-10)</label>
+                        <input
+                            type="number"
+                            min="1"
+                            max="10"
+                            className="form-input"
+                            value={customForm.healthScore}
+                            onChange={(e) => setCustomForm({ ...customForm, healthScore: e.target.value })}
+                            placeholder="7"
+                        />
+                    </div>
+                </div>
+                <div className="flex gap-sm">
+                    <button className="btn btn-primary" onClick={handleAddCustomFood}>
+                        Toevoegen
+                    </button>
+                </div>
+
+                {customFoods.length > 0 && (
+                    <div className="custom-list">
+                        <div className="custom-list-title">Eigen items</div>
+                        <ul className="list">
+                            {customFoods.map(food => (
+                                <li key={food.id} className="list-item">
+                                    <div className="list-item-content">
+                                        <div className="list-item-title">{food.name}</div>
+                                        <div className="list-item-subtitle">{food.serving} • {food.calories} kcal</div>
+                                    </div>
+                                    <button
+                                        className="btn btn-danger btn-small"
+                                        onClick={() => handleRemoveCustomFood(food.id)}
+                                    >
+                                        Verwijder
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+            </div>
+
             {/* Category Tabs */}
             <div className="category-tabs">
                 {categories.map(cat => (
@@ -115,6 +286,9 @@ export default function FoodLogger({ onUpdate }: FoodLoggerProps) {
                             <div className="calories-value">{food.calories}</div>
                             <div className="calories-label">kcal</div>
                         </div>
+                        {food.id.startsWith('cust_') && (
+                            <div className="custom-flag">Eigen</div>
+                        )}
                     </div>
                 ))}
             </div>
@@ -122,6 +296,24 @@ export default function FoodLogger({ onUpdate }: FoodLoggerProps) {
             <style>{`
         .food-logger {
           padding-bottom: var(--space-xl);
+        }
+
+        .custom-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: var(--space-md);
+        }
+
+        .custom-list {
+          margin-top: var(--space-lg);
+        }
+
+        .custom-list-title {
+          font-size: var(--font-size-sm);
+          color: var(--color-text-secondary);
+          margin-bottom: var(--space-sm);
+          text-transform: uppercase;
+          letter-spacing: 0.12em;
         }
         
         .category-tabs {
@@ -173,6 +365,7 @@ export default function FoodLogger({ onUpdate }: FoodLoggerProps) {
           transition: all 0.2s ease;
           box-shadow: var(--shadow-sm);
           border: 1px solid var(--color-border);
+          position: relative;
         }
         
         .food-item:hover {
@@ -223,6 +416,25 @@ export default function FoodLogger({ onUpdate }: FoodLoggerProps) {
         .calories-label {
           font-size: var(--font-size-xs);
           color: var(--color-text-secondary);
+        }
+
+        .custom-flag {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          font-size: var(--font-size-xs);
+          padding: 4px 8px;
+          border-radius: 999px;
+          background: rgba(27, 42, 65, 0.08);
+          color: var(--color-primary);
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
+
+        @media (max-width: 520px) {
+          .custom-grid {
+            grid-template-columns: 1fr;
+          }
         }
       `}</style>
         </div>

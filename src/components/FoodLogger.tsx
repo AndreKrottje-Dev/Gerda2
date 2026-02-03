@@ -106,22 +106,55 @@ export default function FoodLogger({ onUpdate }: FoodLoggerProps) {
             {/* Today's Foods */}
             {todayFoods.length > 0 && (
                 <div className="card mb-lg">
-                    <h3 className="card-title">Vandaag geregistreerd</h3>
+                    <div className="today-header">
+                        <h3 className="card-title">Vandaag geregistreerd</h3>
+                        <div className="today-summary">
+                            {todayFoods.length} items
+                        </div>
+                    </div>
                     <ul className="list">
-                        {todayFoods.map(food => (
-                            <li key={food.id} className="list-item">
+                        {Object.values(
+                            todayFoods.reduce((acc, food) => {
+                                const key = food.name.toLowerCase();
+                                if (!acc[key]) {
+                                    acc[key] = {
+                                        name: food.name,
+                                        calories: food.calories,
+                                        protein: food.protein,
+                                        carbs: food.carbs,
+                                        fat: food.fat,
+                                        healthScore: food.healthScore,
+                                        count: 1,
+                                        ids: [food.id]
+                                    };
+                                } else {
+                                    acc[key].calories += food.calories;
+                                    acc[key].protein += food.protein;
+                                    acc[key].carbs += food.carbs;
+                                    acc[key].fat += food.fat;
+                                    acc[key].count += 1;
+                                    acc[key].ids.push(food.id);
+                                }
+                                return acc;
+                            }, {} as Record<string, { name: string; calories: number; protein: number; carbs: number; fat: number; healthScore: number; count: number; ids: string[] }>)
+                        ).map(item => (
+                            <li key={item.name} className="list-item">
                                 <div className="list-item-content">
-                                    <div className="list-item-title">{food.name}</div>
+                                    <div className="list-item-title">
+                                        {item.name} {item.count > 1 && <span className="item-count">x{item.count}</span>}
+                                    </div>
                                     <div className="list-item-subtitle">
-                                        {food.calories} kcal • {getHealthScoreBadge(food.healthScore)}
+                                        {Math.round(item.calories)} kcal • {getHealthScoreBadge(item.healthScore)}
                                     </div>
                                 </div>
-                                <button
-                                    className="btn btn-danger btn-small"
-                                    onClick={() => handleRemoveFood(food.id)}
-                                >
-                                    ✕
-                                </button>
+                                <div className="list-actions">
+                                    <button
+                                        className="btn btn-secondary btn-small"
+                                        onClick={() => item.ids.forEach(id => handleRemoveFood(id))}
+                                    >
+                                        Verwijder
+                                    </button>
+                                </div>
                             </li>
                         ))}
                     </ul>
@@ -316,6 +349,35 @@ export default function FoodLogger({ onUpdate }: FoodLoggerProps) {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
           gap: var(--space-md);
+        }
+
+        .today-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: var(--space-md);
+          margin-bottom: var(--space-sm);
+        }
+
+        .today-summary {
+          font-size: var(--font-size-xs);
+          color: var(--color-text-secondary);
+          text-transform: uppercase;
+          letter-spacing: 0.12em;
+        }
+
+        .item-count {
+          font-size: var(--font-size-xs);
+          padding: 2px 6px;
+          border-radius: 999px;
+          background: rgba(27, 42, 65, 0.08);
+          color: var(--color-primary);
+          margin-left: var(--space-sm);
+        }
+
+        .list-actions {
+          display: flex;
+          gap: var(--space-xs);
         }
 
         .custom-header {

@@ -21,6 +21,7 @@ export default function FoodLogger({ onUpdate }: FoodLoggerProps) {
         fat: '',
         healthScore: '7'
     });
+    const [isCustomOpen, setIsCustomOpen] = useState(false);
 
     const categories: FoodItem['category'][] = ['ontbijt', 'lunch', 'diner', 'snacks', 'dranken'];
 
@@ -140,11 +141,22 @@ export default function FoodLogger({ onUpdate }: FoodLoggerProps) {
 
             {/* Custom Food */}
             <div className="card mb-lg">
-                <h3 className="card-title">Eigen item toevoegen</h3>
-                <div className="custom-grid">
-                    <div className="form-group">
-                        <label className="form-label">Naam</label>
-                        <input
+                <div className="custom-header">
+                    <h3 className="card-title">Eigen item toevoegen</h3>
+                    <button
+                        className="btn btn-secondary btn-small"
+                        onClick={() => setIsCustomOpen(!isCustomOpen)}
+                    >
+                        {isCustomOpen ? 'Sluiten' : 'Openen'}
+                    </button>
+                </div>
+
+                {isCustomOpen && (
+                    <div className="custom-body">
+                        <div className="custom-grid">
+                        <div className="form-group">
+                            <label className="form-label">Naam</label>
+                            <input
                             type="text"
                             className="form-input"
                             value={customForm.name}
@@ -227,11 +239,13 @@ export default function FoodLogger({ onUpdate }: FoodLoggerProps) {
                         />
                     </div>
                 </div>
-                <div className="flex gap-sm">
-                    <button className="btn btn-primary" onClick={handleAddCustomFood}>
-                        Toevoegen
-                    </button>
-                </div>
+                        <div className="flex gap-sm">
+                            <button className="btn btn-primary" onClick={handleAddCustomFood}>
+                                Toevoegen
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 {customFoods.length > 0 && (
                     <div className="custom-list">
@@ -302,6 +316,17 @@ export default function FoodLogger({ onUpdate }: FoodLoggerProps) {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
           gap: var(--space-md);
+        }
+
+        .custom-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: var(--space-md);
+        }
+
+        .custom-body {
+          margin-top: var(--space-md);
         }
 
         .custom-list {

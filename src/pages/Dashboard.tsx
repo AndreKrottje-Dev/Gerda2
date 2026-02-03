@@ -28,7 +28,7 @@ export default function Dashboard() {
 
   return (
     <div className="app-container">
-      <div className="page">
+      <div className="page dashboard-compact">
         <div className="dashboard-header">
           <div className="brand-lockup">
             <div className="brand-mark">
@@ -62,8 +62,8 @@ export default function Dashboard() {
           <div className="progress-ring-wrapper">
             <ProgressRing
               progress={progress}
-              size={200}
-              strokeWidth={20}
+              size={160}
+              strokeWidth={16}
               color="var(--color-primary)"
               value={`${Math.round(netCalories)}`}
               label={`van ${Math.round(calorieGoal)} kcal`}
@@ -154,18 +154,51 @@ export default function Dashboard() {
           flex-direction: column;
           gap: var(--space-md);
         }
+
+        .dashboard-compact .card {
+          padding: var(--space-md);
+        }
+
+        .dashboard-compact .card-title {
+          margin-bottom: var(--space-sm);
+        }
+
+        .dashboard-compact .gerda-card {
+          padding: var(--space-md);
+          margin-bottom: var(--space-md);
+        }
+
+        .dashboard-compact .gerda-stats {
+          gap: var(--space-sm);
+        }
+
+        .dashboard-compact .gerda-stat {
+          padding: 6px;
+        }
+
+        .dashboard-compact .streak-card {
+          padding: var(--space-md);
+          margin-bottom: var(--space-md);
+          gap: var(--space-md);
+        }
+
+        .dashboard-compact .streak-icon {
+          width: 44px;
+          height: 44px;
+          font-size: 12px;
+        }
         
         .progress-ring-wrapper {
           display: flex;
           justify-content: center;
-          margin: var(--space-xl) 0;
+          margin: var(--space-md) 0 var(--space-lg);
         }
         
         .calorie-breakdown {
           display: flex;
           justify-content: space-around;
           align-items: center;
-          padding: var(--space-lg);
+          padding: var(--space-md);
           background: var(--color-surface);
           border-radius: var(--radius-md);
           margin-top: var(--space-lg);
@@ -210,7 +243,7 @@ export default function Dashboard() {
         .macros-grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: var(--space-md);
+          gap: var(--space-sm);
         }
         
         .macro-item {
@@ -221,8 +254,8 @@ export default function Dashboard() {
         }
         
         .macro-icon {
-          width: 60px;
-          height: 60px;
+          width: 48px;
+          height: 48px;
           border-radius: 50%;
           display: flex;
           align-items: center;
@@ -275,7 +308,7 @@ export default function Dashboard() {
         .action-buttons {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: var(--space-md);
+          gap: var(--space-sm);
         }
         
         .action-btn {
@@ -283,7 +316,7 @@ export default function Dashboard() {
           flex-direction: column;
           align-items: center;
           gap: var(--space-sm);
-          padding: var(--space-lg);
+          padding: var(--space-md);
           background: var(--color-card);
           border-radius: var(--radius-md);
           box-shadow: var(--shadow-md);
@@ -298,8 +331,8 @@ export default function Dashboard() {
         }
         
         .action-icon {
-          width: 52px;
-          height: 52px;
+          width: 44px;
+          height: 44px;
           border-radius: 14px;
           background: var(--color-surface);
           display: flex;
@@ -318,6 +351,10 @@ export default function Dashboard() {
         }
         
         @media (max-width: 480px) {
+          .dashboard-compact .card {
+            padding: var(--space-md);
+          }
+
           .calorie-breakdown {
             flex-direction: column;
             gap: var(--space-md);

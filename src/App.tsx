@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { useEffect, useState } from 'react';
 import { getUserProfile } from './utils/storage';
 import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
@@ -9,12 +8,8 @@ import ProgressPage from './pages/ProgressPage';
 import ProfilePage from './pages/ProfilePage';
 
 function AppRoutes() {
-  const location = useLocation();
-  const [profile, setProfile] = useState(getUserProfile());
-
-  useEffect(() => {
-    setProfile(getUserProfile());
-  }, [location.pathname]);
+  useLocation();
+  const profile = getUserProfile();
 
   const hasProfile = profile !== null;
 
